@@ -37,7 +37,7 @@ const RichTextEditor: React.FC<Props> = ({ initialContent, onChange }) => {
                 selectedImage.style.outline = 'none';
             }
             // Select new
-            target.style.outline = '2px solid #3b82f6'; // Blue outline
+            target.style.outline = '3px solid #3b82f6'; // Stronger Blue outline
             setSelectedImage(target as HTMLImageElement);
         } else {
             // Deselect if clicking elsewhere
@@ -69,7 +69,8 @@ const RichTextEditor: React.FC<Props> = ({ initialContent, onChange }) => {
   };
 
   const insertSignature = (dataUrl: string) => {
-    const img = `<img src="${dataUrl}" alt="signature" draggable="true" style="max-height: 60px; vertical-align: middle; cursor: move; display: inline-block; margin: 0 4px;" />`;
+    // Insert with draggable properties and inline-block display for better flow interaction
+    const img = `<img src="${dataUrl}" alt="signature" draggable="true" style="max-height: 80px; width: auto; vertical-align: middle; cursor: move; display: inline-block; margin: 5px; border: 1px dashed transparent;" onmouseover="this.style.borderColor='#cbd5e1'" onmouseout="this.style.borderColor='transparent'" />`;
     if (contentRef.current) {
        contentRef.current.focus();
        document.execCommand('insertHTML', false, img);
@@ -84,7 +85,7 @@ const RichTextEditor: React.FC<Props> = ({ initialContent, onChange }) => {
       const reader = new FileReader();
       reader.onload = (event) => {
         if (event.target?.result) {
-          const imgHtml = `<img src="${event.target.result}" draggable="true" style="max-width: 100%; height: auto; margin: 10px 0; cursor: move;" />`;
+          const imgHtml = `<img src="${event.target.result}" draggable="true" style="max-width: 100%; height: auto; margin: 10px 0; cursor: move; display: block;" />`;
           if (contentRef.current) {
              contentRef.current.focus();
              document.execCommand('insertHTML', false, imgHtml);
@@ -118,7 +119,28 @@ const RichTextEditor: React.FC<Props> = ({ initialContent, onChange }) => {
   const updateImageSize = (percent: number) => {
       if (selectedImage) {
           selectedImage.style.width = `${percent}%`;
-          selectedImage.style.maxHeight = 'none'; // Unset max-height restriction if manually resizing width
+          selectedImage.style.maxHeight = 'none'; // Unset max-height restriction
+          handleChange();
+      }
+  };
+
+  const updateImageAlignment = (align: 'left' | 'center' | 'right') => {
+      if (selectedImage) {
+          // Reset basic styles
+          selectedImage.style.display = 'block'; 
+          selectedImage.style.float = 'none';
+          selectedImage.style.margin = '10px 0';
+          
+          if (align === 'left') {
+              selectedImage.style.float = 'left';
+              selectedImage.style.margin = '0 15px 10px 0';
+          } else if (align === 'right') {
+              selectedImage.style.float = 'right';
+              selectedImage.style.margin = '0 0 10px 15px';
+          } else {
+              // center
+              selectedImage.style.margin = '10px auto';
+          }
           handleChange();
       }
   };
@@ -138,25 +160,32 @@ const RichTextEditor: React.FC<Props> = ({ initialContent, onChange }) => {
         
         {selectedImage ? (
             <div className="flex items-center gap-4 w-full animate-in fade-in">
-                <span className="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded border border-blue-200 uppercase">Image Selected</span>
+                <span className="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded border border-blue-200 uppercase flex items-center gap-1">
+                   <ImageIcon /> Image Selected
+                </span>
+                
+                {/* Image Alignment */}
+                <div className="flex items-center gap-1 border-r border-slate-200 pr-3 mr-1">
+                    <ToolbarButton onClick={() => updateImageAlignment('left')} title="Float Left"><AlignLeftIcon /></ToolbarButton>
+                    <ToolbarButton onClick={() => updateImageAlignment('center')} title="Center"><AlignCenterIcon /></ToolbarButton>
+                    <ToolbarButton onClick={() => updateImageAlignment('right')} title="Float Right"><AlignRightIcon /></ToolbarButton>
+                </div>
+
+                {/* Image Resizing */}
                 <div className="flex items-center gap-2">
                     <span className="text-xs text-slate-500">Size:</span>
                     <input 
                       type="range" min="10" max="100" step="5" defaultValue="50"
                       onChange={(e) => updateImageSize(parseInt(e.target.value))}
-                      className="w-32 h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer"
+                      className="w-24 h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer"
                     />
                 </div>
-                <div className="flex items-center gap-1">
-                    <button onClick={() => updateImageSize(25)} className="text-xs px-2 py-1 bg-white border rounded hover:bg-slate-50">S</button>
-                    <button onClick={() => updateImageSize(50)} className="text-xs px-2 py-1 bg-white border rounded hover:bg-slate-50">M</button>
-                    <button onClick={() => updateImageSize(100)} className="text-xs px-2 py-1 bg-white border rounded hover:bg-slate-50">L</button>
-                </div>
+                
                 <button 
                   onClick={deleteSelectedImage}
                   className="ml-auto text-xs px-3 py-1 bg-red-50 text-red-600 border border-red-200 rounded hover:bg-red-100 font-medium"
                 >
-                    Remove Image
+                    Delete
                 </button>
                 <button 
                   onClick={() => {
@@ -165,7 +194,7 @@ const RichTextEditor: React.FC<Props> = ({ initialContent, onChange }) => {
                           setSelectedImage(null);
                       }
                   }}
-                  className="text-xs text-slate-400 hover:text-slate-600"
+                  className="text-xs text-slate-400 hover:text-slate-600 px-2"
                 >
                     Cancel
                 </button>

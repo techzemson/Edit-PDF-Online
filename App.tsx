@@ -93,83 +93,84 @@ const App: React.FC = () => {
            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 md:p-10 space-y-8">
              <div className="border-b border-slate-100 pb-6">
                 <h1 className="text-3xl font-bold text-slate-900 mb-2">Documentation</h1>
-                <p className="text-slate-500">Learn how to use Smart PDF Editor to its full potential.</p>
+                <p className="text-slate-500">Master the features of your Smart PDF Editor.</p>
              </div>
 
              <section className="space-y-4">
                 <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
                    <span className="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-sm font-bold">1</span>
-                   Getting Started
+                   Signature Studio
                 </h2>
-                <p className="text-slate-600 leading-relaxed">
-                   Smart PDF Editor is an AI-powered tool that allows you to upload any PDF document and instantly extract text, analyze sentiments, and get automatic summaries. To begin, simply click the "Select PDF File" button on the home page.
-                </p>
+                <div className="pl-10 space-y-4 text-slate-600">
+                   <p className="leading-relaxed">
+                     Easily sign your documents with the advanced Signature modal. Click the <span className="font-bold text-blue-600">SIGN</span> button to start.
+                   </p>
+                   <ul className="grid md:grid-cols-2 gap-4">
+                      <li className="bg-slate-50 p-3 rounded-lg border border-slate-100">
+                        <strong className="block text-slate-800 mb-1">Drawing Pad</strong>
+                        Draw your signature with mouse or touch. Adjust stroke thickness and choose from Black, Blue, or Red ink.
+                      </li>
+                      <li className="bg-slate-50 p-3 rounded-lg border border-slate-100">
+                        <strong className="block text-slate-800 mb-1">Type with Fonts</strong>
+                        Type your name and choose from over 10 premium handwriting fonts (like Great Vibes, Sacramento). Toggle "Bold" for a stronger look.
+                      </li>
+                      <li className="bg-slate-50 p-3 rounded-lg border border-slate-100">
+                        <strong className="block text-slate-800 mb-1">Upload</strong>
+                        Already have a signature scan? Upload any image (PNG/JPG) to use as your signature.
+                      </li>
+                      <li className="bg-slate-50 p-3 rounded-lg border border-slate-100">
+                        <strong className="block text-slate-800 mb-1">Drag & Resize</strong>
+                        Once inserted, click the signature to select it. You can resize it, align it (Left, Center, Right), or drag it to a new line.
+                      </li>
+                   </ul>
+                </div>
              </section>
 
              <section className="space-y-4">
                 <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
                    <span className="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-sm font-bold">2</span>
-                   Editing & Annotation
+                   Advanced Editing
                 </h2>
-                <div className="grid md:grid-cols-2 gap-4">
-                   <div className="p-4 bg-slate-50 rounded-lg border border-slate-100">
-                      <h3 className="font-bold text-slate-800 mb-1">Rich Text Editor</h3>
-                      <p className="text-sm text-slate-600">Full control over your document. Bold, Italicize, Underline, and create Lists.</p>
-                   </div>
-                   <div className="p-4 bg-slate-50 rounded-lg border border-slate-100">
-                      <h3 className="font-bold text-slate-800 mb-1">Insert Images</h3>
-                      <p className="text-sm text-slate-600">Click the Image icon in the toolbar to upload and insert images anywhere in the doc.</p>
-                   </div>
-                   <div className="p-4 bg-slate-50 rounded-lg border border-slate-100">
-                      <h3 className="font-bold text-slate-800 mb-1">Highlight & Annotate</h3>
-                      <p className="text-sm text-slate-600">Select text and click the Highlighter icon to emphasize important sections.</p>
-                   </div>
-                   <div className="p-4 bg-slate-50 rounded-lg border border-slate-100">
-                      <h3 className="font-bold text-slate-800 mb-1">Redact Information</h3>
-                      <p className="text-sm text-slate-600">Select sensitive text and click the Eye-Off icon to blackout (redact) it manually.</p>
-                   </div>
+                <div className="pl-10 space-y-3 text-slate-600">
+                   <p>The toolbar gives you complete control over your document:</p>
+                   <ul className="list-disc pl-5 space-y-2">
+                      <li><strong>Formatting:</strong> Bold, Italic, Underline, Lists, and Alignment (Left, Center, Right, Justify).</li>
+                      <li><strong>Images:</strong> Insert images from your device. Click an image to reveal special controls for <strong>Floating</strong> (wrapping text around images) and <strong>Resizing</strong>.</li>
+                      <li><strong>History:</strong> Use Undo/Redo buttons to revert changes anytime.</li>
+                      <li><strong>Links:</strong> Add clickable hyperlinks to any text selection.</li>
+                   </ul>
                 </div>
              </section>
 
              <section className="space-y-4">
                 <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
                    <span className="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-sm font-bold">3</span>
-                   Page Setup & Layout
+                   Page Layout & Exports
                 </h2>
-                <p className="text-slate-600 leading-relaxed">
-                   Click the <strong>Page Setup</strong> button in the top right of the editor to access layout options:
-                </p>
-                <ul className="list-disc pl-6 space-y-2 text-slate-600">
-                   <li><strong>Headers & Footers:</strong> Add custom text to the top and bottom of every page.</li>
-                   <li><strong>Watermarks:</strong> Add a text watermark (e.g., "CONFIDENTIAL") that appears diagonally on every page.</li>
-                   <li><strong>Page Numbers:</strong> Automatically number every page in the bottom-right corner.</li>
-                </ul>
-             </section>
-
-             <section className="space-y-4">
-                <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
-                   <span className="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-sm font-bold">4</span>
-                   AI Power Tools
-                </h2>
-                <div className="space-y-3">
-                  <p className="text-slate-600">Use the sidebar to perform advanced AI actions:</p>
-                  <ul className="list-disc pl-6 space-y-2 text-slate-600">
-                     <li><strong>Remove Watermark Text:</strong> AI intelligently finds and removes repetitive text like "Draft" or "Sample" from the content.</li>
-                     <li><strong>Redact Sensitive Info:</strong> Automatically detects and replaces Names, Emails, Phone Numbers, and Addresses with [REDACTED].</li>
-                     <li><strong>Translate:</strong> Instantly translate your entire document into Spanish, French, German, or Chinese.</li>
-                     <li><strong>Summarize & Simplify:</strong> Create executive summaries or simplify complex language for broader audiences.</li>
-                  </ul>
+                <div className="pl-10 space-y-3 text-slate-600">
+                   <p>Customize how your final PDF looks using the <strong>Page Setup</strong> menu:</p>
+                   <ul className="list-disc pl-5 space-y-2">
+                      <li><strong>Watermarks:</strong> Add diagonal watermarks (e.g., "CONFIDENTIAL") to every page.</li>
+                      <li><strong>Headers/Footers:</strong> Add custom text to the top and bottom of pages.</li>
+                      <li><strong>Page Numbers:</strong> Auto-numbering for professional documents.</li>
+                      <li><strong>Multiple Formats:</strong> Export your work as <strong>PDF</strong>, <strong>Word (DOCX)</strong>, <strong>Excel (CSV)</strong>, or <strong>Text</strong>.</li>
+                   </ul>
                 </div>
              </section>
 
              <section className="space-y-4">
                 <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
-                   <span className="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-sm font-bold">5</span>
-                   Adding Signatures
+                   <span className="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-sm font-bold">4</span>
+                   AI Intelligence
                 </h2>
-                <p className="text-slate-600 leading-relaxed">
-                   Click the "Sign" button in the toolbar. You can <strong>Draw</strong> your signature, <strong>Type</strong> it to use a handwriting font, or <strong>Upload</strong> an image of your signature.
-                </p>
+                <div className="pl-10 space-y-3 text-slate-600">
+                   <p>Utilize the sidebar tools to clean and enhance your document:</p>
+                   <ul className="list-disc pl-5 space-y-2">
+                      <li><strong>Security:</strong> Auto-Redact sensitive PII or Remove Watermark text from the content.</li>
+                      <li><strong>Transformation:</strong> Translate entire documents, fix grammar, or change the tone to Professional/Casual.</li>
+                      <li><strong>Extraction:</strong> Extract emails, phone numbers, and dates into a structured list.</li>
+                   </ul>
+                </div>
              </section>
              
              <div className="pt-6 border-t border-slate-100">
