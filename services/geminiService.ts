@@ -100,27 +100,32 @@ export const transformText = async (text: string, action: ToolAction): Promise<s
     case ToolAction.TRANSLATE_DE: promptText = "Translate this text to German."; break;
     case ToolAction.TRANSLATE_ZH: promptText = "Translate this text to Chinese (Simplified)."; break;
 
-    // Styles
+    // Styles & Writing
     case ToolAction.EXPAND: promptText = "Expand on the ideas in this text with more detail and context."; break;
     case ToolAction.SHORTEN: promptText = "Condense this text significantly without losing key information."; break;
     case ToolAction.MAKE_PROFESSIONAL: promptText = "Rewrite this in a strictly professional, corporate business tone."; break;
     case ToolAction.MAKE_CASUAL: promptText = "Rewrite this in a friendly, casual, and conversational tone."; break;
     case ToolAction.MAKE_ACADEMIC: promptText = "Rewrite this in a formal academic tone suitable for a research paper."; break;
     case ToolAction.MAKE_PERSUASIVE: promptText = "Rewrite this to be more persuasive and compelling."; break;
+    case ToolAction.DRAFT_REPLY: promptText = "Draft a professional response or email reply based on the context of this document."; break;
+    case ToolAction.CRITIQUE: promptText = "Provide constructive criticism on this text. Point out logic gaps, weak arguments, or structural issues."; break;
 
     // Extraction
     case ToolAction.EXTRACT_EMAILS: promptText = "Extract all email addresses found in the text as a list. If none, say 'No emails found'."; break;
     case ToolAction.EXTRACT_DATES: promptText = "Extract all dates and time references found in the text as a list."; break;
     case ToolAction.EXTRACT_URLS: promptText = "Extract all website URLs found in the text as a list."; break;
     case ToolAction.EXTRACT_PHONE: promptText = "Extract all phone numbers found in the text as a list."; break;
+    case ToolAction.CONVERT_TO_TABLE: promptText = "Identify structured data in the text and convert it into a clean Markdown table."; break;
 
     // Formatting & Logic
     case ToolAction.ACTION_ITEMS: promptText = "Create a checklist of clear action items based on this text."; break;
     case ToolAction.RISK_ASSESSMENT: promptText = "Analyze potential risks, liabilities, or warnings mentioned or implied in this text."; break;
     case ToolAction.GENERATE_QUIZ: promptText = "Generate 3 multiple choice questions (with answers) based on this text."; break;
+    case ToolAction.GENERATE_FAQS: promptText = "Generate 5 Frequently Asked Questions (FAQs) with clear answers based on this content."; break;
     case ToolAction.BULLET_POINTS: promptText = "Convert the main points of this text into a bulleted list."; break;
     case ToolAction.FIX_PUNCTUATION: promptText = "Fix only the punctuation in this text, keeping words the same."; break;
     case ToolAction.FORMAT_HTML: promptText = "Format this text as clean HTML code (using p, h1, ul, etc tags) inside a div."; break;
+    case ToolAction.EXPLAIN_TERMS: promptText = "Identify difficult, technical, or industry-specific terms in this text and provide simple definitions for them."; break;
 
     // Clean Up & Security
     case ToolAction.REMOVE_WATERMARK: promptText = "Remove repetitive watermark phrases (like 'Confidential', 'Draft', 'Sample') or artifact text that appears to be a watermark. Keep the core content intact."; break;

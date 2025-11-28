@@ -35,27 +35,32 @@ export enum ToolAction {
   TRANSLATE_DE = 'Translate (German)',
   TRANSLATE_ZH = 'Translate (Chinese)',
 
-  // Editing
+  // Editing & Writing
   EXPAND = 'Expand Text',
   SHORTEN = 'Shorten Text',
   MAKE_PROFESSIONAL = 'Make Professional',
   MAKE_CASUAL = 'Make Casual',
   MAKE_ACADEMIC = 'Make Academic',
   MAKE_PERSUASIVE = 'Make Persuasive',
+  DRAFT_REPLY = 'Draft Reply Email',
+  CRITIQUE = 'Critique Content',
   
-  // Extraction
+  // Extraction & Data
   EXTRACT_EMAILS = 'Extract Emails',
   EXTRACT_DATES = 'Extract Dates',
   EXTRACT_URLS = 'Extract URLs',
   EXTRACT_PHONE = 'Extract Phone #',
+  CONVERT_TO_TABLE = 'Convert to Table',
   
   // Structure & Format
   ACTION_ITEMS = 'Action Items',
   RISK_ASSESSMENT = 'Risk Assessment',
   GENERATE_QUIZ = 'Generate Quiz',
+  GENERATE_FAQS = 'Generate FAQs',
   BULLET_POINTS = 'Convert to Bullets',
   FIX_PUNCTUATION = 'Fix Punctuation',
   FORMAT_HTML = 'Format as HTML',
+  EXPLAIN_TERMS = 'Explain Terms',
 
   // Clean Up & Security
   REMOVE_WATERMARK = 'Remove Watermark Text',

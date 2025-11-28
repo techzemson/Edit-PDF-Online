@@ -203,29 +203,39 @@ const AnalysisView: React.FC<Props> = ({ analysis, onReset }) => {
     <div className="flex flex-col lg:flex-row h-full gap-6 p-4 md:p-6 bg-slate-50 min-h-screen">
       
       {/* Sidebar / Toolbar */}
-      <div className="w-full lg:w-72 flex-shrink-0 flex flex-col gap-4 max-h-[calc(100vh-3rem)] sticky top-6">
+      <div className="w-full lg:w-80 flex-shrink-0 flex flex-col gap-4 lg:max-h-[calc(100vh-3rem)] sticky top-6">
         
         {/* Upload Another Button (Moved to Top) */}
         <button 
           onClick={onReset}
-          className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl shadow-md transition-all flex items-center justify-center gap-2 transform active:scale-95"
+          className="w-full py-4 px-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 transform active:scale-95 text-lg"
         >
-          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
           </svg>
           Upload Another PDF
         </button>
 
-        <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex-1 flex flex-col overflow-hidden">
-          <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2 flex-shrink-0">
-            <span className="w-2 h-6 bg-blue-600 rounded-full"></span>
-            AI Power Tools
-          </h3>
-          <div className="overflow-y-auto pr-2 custom-scrollbar flex-1">
-            <div className="space-y-6">
-              {/* Grouping Actions */}
-              <div>
-                <h4 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Basics</h4>
+        <div className="bg-white rounded-xl shadow-md border border-slate-200 flex-1 flex flex-col overflow-hidden">
+          <div className="p-4 border-b border-slate-100 bg-slate-50">
+             <h3 className="font-extrabold text-slate-800 flex items-center gap-2 text-lg">
+                <span className="flex items-center justify-center w-8 h-8 rounded-lg bg-blue-100 text-blue-600">
+                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                </span>
+                AI Power Tools
+             </h3>
+             <p className="text-xs text-slate-500 mt-1 pl-10">Click to transform your content</p>
+          </div>
+          
+          <div className="overflow-y-auto pr-2 pl-4 pb-4 pt-2 custom-scrollbar flex-1 space-y-6">
+              {/* Group: Smart Basics */}
+              <div className="space-y-2">
+                <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2 mt-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-green-400"></span> 
+                    Smart Actions
+                </h4>
                 <div className="grid grid-cols-1 gap-2">
                    {[ToolAction.SUMMARIZE, ToolAction.FIX_GRAMMAR, ToolAction.SIMPLIFY, ToolAction.BULLET_POINTS].map(action => (
                      <ActionButton key={action} action={action} onClick={handleToolAction} disabled={isProcessing} />
@@ -233,8 +243,60 @@ const AnalysisView: React.FC<Props> = ({ analysis, onReset }) => {
                 </div>
               </div>
 
-              <div>
-                <h4 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Clean & Secure</h4>
+              {/* Group: Writing & Editing */}
+              <div className="space-y-2">
+                <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-purple-400"></span> 
+                    Writing Assistant
+                </h4>
+                <div className="grid grid-cols-1 gap-2">
+                   {[ToolAction.DRAFT_REPLY, ToolAction.CRITIQUE, ToolAction.MAKE_PROFESSIONAL, ToolAction.EXPAND].map(action => (
+                     <ActionButton key={action} action={action} onClick={handleToolAction} disabled={isProcessing} />
+                   ))}
+                   <div className="grid grid-cols-2 gap-2">
+                       {[ToolAction.MAKE_CASUAL, ToolAction.MAKE_PERSUASIVE].map(action => (
+                         <ActionButton key={action} action={action} onClick={handleToolAction} disabled={isProcessing} />
+                       ))}
+                   </div>
+                </div>
+              </div>
+
+               {/* Group: Data & Extraction */}
+               <div className="space-y-2">
+                <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-orange-400"></span> 
+                    Extract & Organize
+                </h4>
+                <div className="grid grid-cols-1 gap-2">
+                     <ActionButton action={ToolAction.CONVERT_TO_TABLE} onClick={handleToolAction} disabled={isProcessing} />
+                     <ActionButton action={ToolAction.EXPLAIN_TERMS} onClick={handleToolAction} disabled={isProcessing} />
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                   {[ToolAction.EXTRACT_EMAILS, ToolAction.EXTRACT_URLS, ToolAction.EXTRACT_DATES, ToolAction.EXTRACT_PHONE].map(action => (
+                     <ActionButton key={action} action={action} onClick={handleToolAction} disabled={isProcessing} />
+                   ))}
+                </div>
+              </div>
+
+              {/* Group: Structure & Knowledge */}
+              <div className="space-y-2">
+                <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-blue-400"></span> 
+                    Structure & Knowledge
+                </h4>
+                <div className="grid grid-cols-1 gap-2">
+                   {[ToolAction.ACTION_ITEMS, ToolAction.GENERATE_FAQS, ToolAction.GENERATE_QUIZ, ToolAction.FORMAT_HTML].map(action => (
+                     <ActionButton key={action} action={action} onClick={handleToolAction} disabled={isProcessing} />
+                   ))}
+                </div>
+              </div>
+
+              {/* Group: Clean & Secure */}
+              <div className="space-y-2">
+                <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-red-400"></span> 
+                    Clean & Secure
+                </h4>
                 <div className="grid grid-cols-1 gap-2">
                    {[ToolAction.REMOVE_WATERMARK, ToolAction.REDACT_PII].map(action => (
                      <ActionButton key={action} action={action} onClick={handleToolAction} disabled={isProcessing} />
@@ -242,56 +304,36 @@ const AnalysisView: React.FC<Props> = ({ analysis, onReset }) => {
                 </div>
               </div>
 
-              <div>
-                <h4 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Translate</h4>
+              {/* Group: Translate */}
+              <div className="space-y-2">
+                <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-indigo-400"></span> 
+                    Translate
+                </h4>
                 <div className="grid grid-cols-2 gap-2">
                    {[ToolAction.TRANSLATE_ES, ToolAction.TRANSLATE_FR, ToolAction.TRANSLATE_DE, ToolAction.TRANSLATE_ZH].map(action => (
                      <ActionButton key={action} action={action} onClick={handleToolAction} disabled={isProcessing} />
                    ))}
                 </div>
               </div>
-
-              <div>
-                <h4 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Tone & Style</h4>
-                <div className="grid grid-cols-1 gap-2">
-                   {[ToolAction.MAKE_PROFESSIONAL, ToolAction.MAKE_CASUAL, ToolAction.MAKE_ACADEMIC, ToolAction.MAKE_PERSUASIVE].map(action => (
-                     <ActionButton key={action} action={action} onClick={handleToolAction} disabled={isProcessing} />
-                   ))}
-                </div>
-              </div>
-
-               <div>
-                <h4 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Extract Data</h4>
-                <div className="grid grid-cols-2 gap-2">
-                   {[ToolAction.EXTRACT_EMAILS, ToolAction.EXTRACT_URLS, ToolAction.EXTRACT_DATES, ToolAction.EXTRACT_PHONE].map(action => (
-                     <ActionButton key={action} action={action} onClick={handleToolAction} disabled={isProcessing} />
-                   ))}
-                </div>
-              </div>
-              
-              <div>
-                <h4 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Advanced</h4>
-                <div className="grid grid-cols-1 gap-2">
-                   {[ToolAction.ACTION_ITEMS, ToolAction.RISK_ASSESSMENT, ToolAction.GENERATE_QUIZ, ToolAction.FORMAT_HTML].map(action => (
-                     <ActionButton key={action} action={action} onClick={handleToolAction} disabled={isProcessing} />
-                   ))}
-                </div>
-              </div>
-            </div>
           </div>
         </div>
 
-        <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex-shrink-0">
-          <h3 className="font-bold text-slate-800 mb-2">Doc Stats</h3>
+        <div className="bg-white p-5 rounded-xl shadow-md border border-slate-200 flex-shrink-0">
+          <h3 className="font-bold text-slate-800 mb-3 border-b border-slate-100 pb-2">Document Stats</h3>
           <div className="space-y-3 text-sm">
              <div className="flex justify-between items-center">
                <span className="text-slate-500">Reading Time</span>
-               <span className="font-medium text-slate-900">{analysis.readingTimeMin} min</span>
+               <span className="font-bold text-slate-900 bg-slate-100 px-2 py-0.5 rounded">{analysis.readingTimeMin} min</span>
+             </div>
+             <div className="flex justify-between items-center">
+               <span className="text-slate-500">Entities</span>
+               <span className="font-bold text-slate-900 bg-slate-100 px-2 py-0.5 rounded">{analysis.entityCount}</span>
              </div>
              <div className="flex justify-between items-center">
                <span className="text-slate-500">Sentiment</span>
-               <span className={`font-bold ${analysis.sentimentScore > 60 ? 'text-green-600' : analysis.sentimentScore < 40 ? 'text-red-600' : 'text-yellow-600'}`}>
-                 {analysis.sentimentLabel} ({analysis.sentimentScore}%)
+               <span className={`font-bold px-2 py-0.5 rounded ${analysis.sentimentScore > 60 ? 'text-green-700 bg-green-100' : analysis.sentimentScore < 40 ? 'text-red-700 bg-red-100' : 'text-yellow-700 bg-yellow-100'}`}>
+                 {analysis.sentimentLabel}
                </span>
              </div>
           </div>
@@ -302,34 +344,34 @@ const AnalysisView: React.FC<Props> = ({ analysis, onReset }) => {
       <div className="flex-1 flex flex-col gap-4 min-h-0">
         
         {/* Header Tabs */}
-        <div className="flex items-center justify-between bg-white p-2 rounded-xl shadow-sm border border-slate-200 flex-wrap gap-2">
-          <div className="flex gap-2">
+        <div className="flex items-center justify-between bg-white p-3 rounded-xl shadow-md border border-slate-200 flex-wrap gap-2">
+          <div className="flex gap-2 bg-slate-100 p-1 rounded-lg">
             <button
               onClick={() => setActiveTab('editor')}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+              className={`flex items-center gap-2 px-5 py-2.5 rounded-md text-sm font-bold transition-all ${
                 activeTab === 'editor' 
-                  ? 'bg-blue-600 text-white shadow-md' 
-                  : 'text-slate-600 hover:bg-slate-100'
+                  ? 'bg-white text-blue-600 shadow-sm' 
+                  : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'
               }`}
             >
               <TextIcon /> Editor
             </button>
             <button
               onClick={() => setActiveTab('charts')}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+              className={`flex items-center gap-2 px-5 py-2.5 rounded-md text-sm font-bold transition-all ${
                 activeTab === 'charts' 
-                  ? 'bg-blue-600 text-white shadow-md' 
-                  : 'text-slate-600 hover:bg-slate-100'
+                  ? 'bg-white text-blue-600 shadow-sm' 
+                  : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'
               }`}
             >
               <ChartIcon /> Visualization
             </button>
           </div>
 
-          <div className="flex items-center gap-2 ml-auto">
+          <div className="flex items-center gap-3 ml-auto">
             <button
                onClick={() => setShowPageSetup(true)}
-               className="flex items-center gap-2 px-4 py-2 text-slate-600 text-sm font-medium rounded-lg hover:bg-slate-100 transition-colors border border-transparent hover:border-slate-200"
+               className="flex items-center gap-2 px-4 py-2.5 text-slate-600 text-sm font-semibold rounded-lg hover:bg-slate-100 transition-colors border border-transparent hover:border-slate-200"
             >
               <SettingsIcon /> Page Setup
             </button>
@@ -337,25 +379,30 @@ const AnalysisView: React.FC<Props> = ({ analysis, onReset }) => {
             <div className="relative">
               <button 
                 onClick={() => setShowExportMenu(!showExportMenu)}
-                className="flex items-center gap-2 px-4 py-2 bg-slate-900 text-white text-sm font-medium rounded-lg hover:bg-slate-800 transition-colors"
+                className="flex items-center gap-2 px-6 py-2.5 bg-slate-900 text-white text-sm font-bold rounded-xl hover:bg-slate-800 transition-colors shadow-lg shadow-slate-900/20"
               >
                 <DownloadIcon /> Export
               </button>
               
               {showExportMenu && (
-                <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl border border-slate-100 z-50 overflow-hidden">
-                  <div className="py-1">
-                    <button onClick={downloadPDF} className="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-blue-50 hover:text-blue-700 flex items-center gap-2">
-                      <span className="font-bold text-red-500">PDF</span> Document (.pdf)
+                <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-2xl border border-slate-100 z-50 overflow-hidden ring-1 ring-black/5 animate-in fade-in zoom-in-95 duration-100">
+                  <div className="py-2">
+                    <div className="px-4 py-2 text-xs font-semibold text-slate-400 uppercase">Download As</div>
+                    <button onClick={downloadPDF} className="w-full text-left px-4 py-3 text-sm text-slate-700 hover:bg-blue-50 hover:text-blue-700 flex items-center gap-3 transition-colors">
+                      <div className="w-8 h-8 rounded-lg bg-red-100 text-red-600 flex items-center justify-center font-bold text-xs">PDF</div>
+                      <span className="font-semibold">PDF Document</span>
                     </button>
-                    <button onClick={downloadDoc} className="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-blue-50 hover:text-blue-700 flex items-center gap-2">
-                      <span className="font-bold text-blue-600">Word</span> Document (.doc)
+                    <button onClick={downloadDoc} className="w-full text-left px-4 py-3 text-sm text-slate-700 hover:bg-blue-50 hover:text-blue-700 flex items-center gap-3 transition-colors">
+                      <div className="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-xs">DOC</div>
+                      <span className="font-semibold">Word Document</span>
                     </button>
-                    <button onClick={downloadCSV} className="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-blue-50 hover:text-blue-700 flex items-center gap-2">
-                      <span className="font-bold text-green-600">Excel</span> / CSV Data (.csv)
+                    <button onClick={downloadCSV} className="w-full text-left px-4 py-3 text-sm text-slate-700 hover:bg-blue-50 hover:text-blue-700 flex items-center gap-3 transition-colors">
+                      <div className="w-8 h-8 rounded-lg bg-green-100 text-green-600 flex items-center justify-center font-bold text-xs">CSV</div>
+                      <span className="font-semibold">Excel / Data</span>
                     </button>
-                    <button onClick={downloadTxt} className="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-blue-50 hover:text-blue-700 flex items-center gap-2">
-                      <span className="font-bold text-slate-500">TXT</span> Plain Text (.txt)
+                    <button onClick={downloadTxt} className="w-full text-left px-4 py-3 text-sm text-slate-700 hover:bg-blue-50 hover:text-blue-700 flex items-center gap-3 transition-colors">
+                       <div className="w-8 h-8 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center font-bold text-xs">TXT</div>
+                      <span className="font-semibold">Plain Text</span>
                     </button>
                   </div>
                 </div>
@@ -368,13 +415,14 @@ const AnalysisView: React.FC<Props> = ({ analysis, onReset }) => {
         </div>
 
         {/* Dynamic View */}
-        <div className="flex-1 bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden relative flex flex-col">
+        <div className="flex-1 bg-white rounded-xl shadow-md border border-slate-200 overflow-hidden relative flex flex-col">
           
           {isProcessing && (
             <div className="absolute inset-0 bg-white/80 backdrop-blur-sm z-30 flex items-center justify-center rounded-xl">
-              <div className="bg-white p-6 rounded-2xl shadow-xl border border-blue-100 flex flex-col items-center animate-in fade-in zoom-in duration-200">
-                <div className="text-blue-600 mb-2"><LoadingSpinner /></div>
-                <p className="text-slate-600 font-medium">Processing: {lastAction}...</p>
+              <div className="bg-white p-8 rounded-2xl shadow-2xl border border-blue-100 flex flex-col items-center animate-in fade-in zoom-in duration-200 max-w-sm text-center">
+                <div className="text-blue-600 mb-4 scale-150"><LoadingSpinner /></div>
+                <h3 className="text-lg font-bold text-slate-800 mb-1">AI is Working...</h3>
+                <p className="text-slate-500 text-sm">Processing <strong>{lastAction}</strong>. This may take a few seconds.</p>
               </div>
             </div>
           )}
@@ -429,7 +477,7 @@ const AnalysisView: React.FC<Props> = ({ analysis, onReset }) => {
   );
 };
 
-// Helper component for buttons
+// Helper component for buttons (Enhanced Design)
 interface ActionButtonProps {
   action: ToolAction;
   onClick: (action: ToolAction) => void;
@@ -440,10 +488,15 @@ const ActionButton: React.FC<ActionButtonProps> = ({ action, onClick, disabled }
   <button
     onClick={() => onClick(action)}
     disabled={disabled}
-    className="w-full text-left px-3 py-2 text-xs font-medium text-slate-600 bg-slate-50 hover:bg-blue-50 hover:text-blue-700 hover:border-blue-200 rounded-lg transition-all border border-slate-100 disabled:opacity-50 truncate"
+    className="group w-full text-left px-4 py-3 bg-white hover:bg-blue-50 border border-slate-200 hover:border-blue-300 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 flex items-center justify-between disabled:opacity-50 disabled:cursor-not-allowed"
     title={action}
   >
-    {action}
+    <span className="text-xs font-semibold text-slate-700 group-hover:text-blue-700 truncate mr-2">{action}</span>
+    <span className="text-slate-300 group-hover:text-blue-400 transform group-hover:translate-x-1 transition-transform">
+      <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M9 5l7 7-7 7" />
+      </svg>
+    </span>
   </button>
 );
 
