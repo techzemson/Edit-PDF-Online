@@ -1,5 +1,10 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { BoldIcon, ItalicIcon, UnderlineIcon, ListIcon, SignatureIcon, ImageIcon, HighlighterIcon, EyeOffIcon } from './Icons';
+import { 
+  BoldIcon, ItalicIcon, UnderlineIcon, ListIcon, SignatureIcon, 
+  ImageIcon, HighlighterIcon, EyeOffIcon, LinkIcon, 
+  AlignLeftIcon, AlignCenterIcon, AlignRightIcon, AlignJustifyIcon,
+  UndoIcon, RedoIcon
+} from './Icons';
 import SignatureModal from './SignatureModal';
 
 interface Props {
@@ -15,8 +20,6 @@ const RichTextEditor: React.FC<Props> = ({ initialContent, onChange }) => {
   // Initialize content securely
   useEffect(() => {
     if (contentRef.current) {
-        // Only set if empty to avoid cursor jumping issues on re-renders
-        // For a simple editor, we assume one-way flow for major updates (like AI processing)
         if(contentRef.current.innerHTML !== initialContent) {
            contentRef.current.innerHTML = initialContent;
         }
@@ -35,12 +38,11 @@ const RichTextEditor: React.FC<Props> = ({ initialContent, onChange }) => {
   };
 
   const insertSignature = (dataUrl: string) => {
-    // Insert image at cursor
-    const img = `<img src="${dataUrl}" alt="signature" style="max-height: 60px; vertical-align: middle;" />`;
-    // We need to restore selection or append if lost
+    const img = `<img src="${dataUrl}" alt="signature" draggable="true" style="max-height: 60px; vertical-align: middle; cursor: move; display: inline-block; margin: 0 4px;" />`;
     if (contentRef.current) {
        contentRef.current.focus();
        // This simple execCommand inserts at the cursor position
+       // The draggable=true attribute allows simple drag and drop within the contentEditable area in modern browsers
        document.execCommand('insertHTML', false, img);
        handleChange();
     }
@@ -53,7 +55,7 @@ const RichTextEditor: React.FC<Props> = ({ initialContent, onChange }) => {
       const reader = new FileReader();
       reader.onload = (event) => {
         if (event.target?.result) {
-          const imgHtml = `<img src="${event.target.result}" style="max-width: 100%; height: auto; margin: 10px 0;" />`;
+          const imgHtml = `<img src="${event.target.result}" draggable="true" style="max-width: 100%; height: auto; margin: 10px 0; cursor: move;" />`;
           if (contentRef.current) {
              contentRef.current.focus();
              document.execCommand('insertHTML', false, imgHtml);
@@ -63,66 +65,93 @@ const RichTextEditor: React.FC<Props> = ({ initialContent, onChange }) => {
       };
       reader.readAsDataURL(file);
     }
-    // Reset input
     if(fileInputRef.current) fileInputRef.current.value = '';
   };
 
+  const insertLink = () => {
+    const url = prompt("Enter the link URL:");
+    if (url) {
+        execCmd('createLink', url);
+    }
+  };
+
   const redactSelection = () => {
-    // Apply black background and black text
     document.execCommand('backColor', false, 'black');
     document.execCommand('foreColor', false, 'black');
     handleChange();
   };
 
   const highlightSelection = () => {
-    document.execCommand('hiliteColor', false, '#fef08a'); // Tailwind yellow-200
+    document.execCommand('hiliteColor', false, '#fef08a');
     handleChange();
   };
 
   return (
     <div className="flex flex-col h-full border rounded-xl overflow-hidden bg-white shadow-sm border-slate-200">
-      {/* Toolbar */}
-      <div className="flex items-center gap-1 p-2 bg-slate-50 border-b border-slate-200 flex-wrap">
-        <ToolbarButton onClick={() => execCmd('bold')} title="Bold"><BoldIcon /></ToolbarButton>
-        <ToolbarButton onClick={() => execCmd('italic')} title="Italic"><ItalicIcon /></ToolbarButton>
-        <ToolbarButton onClick={() => execCmd('underline')} title="Underline"><UnderlineIcon /></ToolbarButton>
+      {/* Enhanced Toolbar */}
+      <div className="flex items-center gap-1 p-2 bg-slate-50 border-b border-slate-200 flex-wrap select-none">
         
-        <div className="w-px h-6 bg-slate-300 mx-1"></div>
-        
-        <ToolbarButton onClick={() => execCmd('insertUnorderedList')} title="Bullet List"><ListIcon /></ToolbarButton>
-        <ToolbarButton onClick={highlightSelection} title="Annotate / Highlight"><HighlighterIcon /></ToolbarButton>
-        <ToolbarButton onClick={redactSelection} title="Redact Selection"><EyeOffIcon /></ToolbarButton>
-        
-        <div className="w-px h-6 bg-slate-300 mx-1"></div>
-        
-        <ToolbarButton onClick={() => fileInputRef.current?.click()} title="Insert Image"><ImageIcon /></ToolbarButton>
-        <input 
-          type="file" 
-          ref={fileInputRef} 
-          className="hidden" 
-          accept="image/*"
-          onChange={handleImageUpload}
-        />
-
+        {/* History Group */}
+        <div className="flex items-center gap-0.5 mr-2">
+            <ToolbarButton onClick={() => execCmd('undo')} title="Undo"><UndoIcon /></ToolbarButton>
+            <ToolbarButton onClick={() => execCmd('redo')} title="Redo"><RedoIcon /></ToolbarButton>
+        </div>
         <div className="w-px h-6 bg-slate-300 mx-1"></div>
 
-        <button
-          onClick={() => setShowSigModal(true)}
-          className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-white hover:shadow-sm rounded transition-all ml-auto border border-transparent hover:border-slate-200"
-        >
-          <SignatureIcon />
-          <span>Sign</span>
-        </button>
+        {/* Formatting Group */}
+        <div className="flex items-center gap-0.5">
+            <ToolbarButton onClick={() => execCmd('bold')} title="Bold (Ctrl+B)"><BoldIcon /></ToolbarButton>
+            <ToolbarButton onClick={() => execCmd('italic')} title="Italic (Ctrl+I)"><ItalicIcon /></ToolbarButton>
+            <ToolbarButton onClick={() => execCmd('underline')} title="Underline (Ctrl+U)"><UnderlineIcon /></ToolbarButton>
+        </div>
+        <div className="w-px h-6 bg-slate-300 mx-1"></div>
+
+        {/* Paragraph Group */}
+        <div className="flex items-center gap-0.5">
+            <ToolbarButton onClick={() => execCmd('justifyLeft')} title="Align Left"><AlignLeftIcon /></ToolbarButton>
+            <ToolbarButton onClick={() => execCmd('justifyCenter')} title="Align Center"><AlignCenterIcon /></ToolbarButton>
+            <ToolbarButton onClick={() => execCmd('justifyRight')} title="Align Right"><AlignRightIcon /></ToolbarButton>
+            <ToolbarButton onClick={() => execCmd('justifyFull')} title="Justify"><AlignJustifyIcon /></ToolbarButton>
+            <ToolbarButton onClick={() => execCmd('insertUnorderedList')} title="Bullet List"><ListIcon /></ToolbarButton>
+        </div>
+        <div className="w-px h-6 bg-slate-300 mx-1"></div>
+
+        {/* Insert Group */}
+        <div className="flex items-center gap-0.5">
+            <ToolbarButton onClick={insertLink} title="Insert Link"><LinkIcon /></ToolbarButton>
+            <ToolbarButton onClick={() => fileInputRef.current?.click()} title="Insert Image"><ImageIcon /></ToolbarButton>
+            <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleImageUpload} />
+        </div>
+        <div className="w-px h-6 bg-slate-300 mx-1"></div>
+
+        {/* Tools Group */}
+        <div className="flex items-center gap-0.5">
+            <ToolbarButton onClick={highlightSelection} title="Highlight Text"><HighlighterIcon /></ToolbarButton>
+            <ToolbarButton onClick={redactSelection} title="Redact (Blackout)"><EyeOffIcon /></ToolbarButton>
+        </div>
+
+        {/* Signature CTA */}
+        <div className="ml-auto pl-2">
+            <button
+            onClick={() => setShowSigModal(true)}
+            className="flex items-center gap-2 px-4 py-1.5 text-xs font-bold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 rounded-lg shadow-md hover:shadow-lg transition-all transform hover:-translate-y-0.5 border border-transparent"
+            title="Add Signature"
+            >
+            <SignatureIcon />
+            <span>SIGN</span>
+            </button>
+        </div>
       </div>
 
       {/* Editor Area */}
       <div 
         ref={contentRef}
-        className="flex-1 p-6 overflow-y-auto outline-none prose-editor prose max-w-none text-slate-800"
+        className="flex-1 p-8 overflow-y-auto outline-none prose-editor prose max-w-none text-slate-800 bg-white"
         contentEditable
         onInput={handleChange}
         onBlur={handleChange}
         suppressContentEditableWarning={true}
+        style={{ minHeight: '600px' }} // Ensure enough height for dragging
       />
 
       {showSigModal && (
@@ -139,7 +168,7 @@ const ToolbarButton: React.FC<{ onClick: () => void; children: React.ReactNode; 
   <button
     onClick={onClick}
     title={title}
-    className="p-1.5 text-slate-600 hover:text-blue-600 hover:bg-white hover:shadow-sm rounded transition-all"
+    className="p-2 text-slate-600 hover:text-blue-600 hover:bg-slate-100 rounded-md transition-all active:scale-95"
   >
     {children}
   </button>
