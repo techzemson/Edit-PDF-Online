@@ -1,0 +1,5 @@
+{
+  "name": "Smart PDF Editor & Analyzer",
+  "description": "An advanced AI-powered PDF tool that allows you to analyze, edit text, visualize data, and transform documents using Gemini 2.5 Flash technology. Features sentiment analysis, automated summarization, and data extraction charts.",
+  "requestFramePermissions": []
+}
