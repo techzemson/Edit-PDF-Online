@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { AnalysisStatus, FileData, PdfAnalysis } from './types';
-import { UploadIcon, CheckCircleIcon, LoadingSpinner } from './components/Icons';
+import { UploadIcon, CheckCircleIcon, LoadingSpinner, BookIcon } from './components/Icons';
 import { analyzePdf } from './services/geminiService';
 import AnalysisView from './components/AnalysisView';
 
+type ViewMode = 'HOME' | 'DOCUMENTATION';
+
 const App: React.FC = () => {
   const [status, setStatus] = useState<AnalysisStatus>(AnalysisStatus.IDLE);
+  const [viewMode, setViewMode] = useState<ViewMode>('HOME');
   const [progress, setProgress] = useState(0);
   const [errorMsg, setErrorMsg] = useState('');
   const [analysisData, setAnalysisData] = useState<PdfAnalysis | null>(null);
@@ -25,6 +28,7 @@ const App: React.FC = () => {
     setStatus(AnalysisStatus.UPLOADING);
     setErrorMsg('');
     setProgress(0);
+    setViewMode('HOME'); // Ensure we are on home view to see progress
 
     // Simulate upload progress
     const uploadInterval = setInterval(() => {
@@ -82,42 +86,119 @@ const App: React.FC = () => {
   };
 
   // Render different views based on status
-  if (status === AnalysisStatus.COMPLETE && analysisData) {
-    return <AnalysisView analysis={analysisData} onReset={reset} />;
-  }
+  const renderContent = () => {
+    if (viewMode === 'DOCUMENTATION') {
+      return (
+        <div className="max-w-4xl mx-auto p-6 md:p-12 w-full">
+           <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 md:p-10 space-y-8">
+             <div className="border-b border-slate-100 pb-6">
+                <h1 className="text-3xl font-bold text-slate-900 mb-2">Documentation</h1>
+                <p className="text-slate-500">Learn how to use Smart PDF Editor to its full potential.</p>
+             </div>
 
-  return (
-    <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
-      
-      {/* Navigation */}
-      <nav className="bg-white border-b border-slate-200 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16 items-center">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-lg">
-                P
-              </div>
-              <span className="font-bold text-xl tracking-tight text-slate-800">Edit PDF Online</span>
-            </div>
-            <div className="flex items-center gap-4">
-               <span className="text-sm text-slate-500 hidden sm:block">Advanced AI Processing</span>
-               <a href="#" className="text-sm font-medium text-blue-600 hover:text-blue-500">Help</a>
-            </div>
-          </div>
+             <section className="space-y-4">
+                <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
+                   <span className="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-sm font-bold">1</span>
+                   Getting Started
+                </h2>
+                <p className="text-slate-600 leading-relaxed">
+                   Smart PDF Editor is an AI-powered tool that allows you to upload any PDF document and instantly extract text, analyze sentiments, and get automatic summaries. To begin, simply click the "Select PDF File" button on the home page.
+                </p>
+             </section>
+
+             <section className="space-y-4">
+                <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
+                   <span className="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-sm font-bold">2</span>
+                   Editing & Annotation
+                </h2>
+                <div className="grid md:grid-cols-2 gap-4">
+                   <div className="p-4 bg-slate-50 rounded-lg border border-slate-100">
+                      <h3 className="font-bold text-slate-800 mb-1">Rich Text Editor</h3>
+                      <p className="text-sm text-slate-600">Full control over your document. Bold, Italicize, Underline, and create Lists.</p>
+                   </div>
+                   <div className="p-4 bg-slate-50 rounded-lg border border-slate-100">
+                      <h3 className="font-bold text-slate-800 mb-1">Insert Images</h3>
+                      <p className="text-sm text-slate-600">Click the Image icon in the toolbar to upload and insert images anywhere in the doc.</p>
+                   </div>
+                   <div className="p-4 bg-slate-50 rounded-lg border border-slate-100">
+                      <h3 className="font-bold text-slate-800 mb-1">Highlight & Annotate</h3>
+                      <p className="text-sm text-slate-600">Select text and click the Highlighter icon to emphasize important sections.</p>
+                   </div>
+                   <div className="p-4 bg-slate-50 rounded-lg border border-slate-100">
+                      <h3 className="font-bold text-slate-800 mb-1">Redact Information</h3>
+                      <p className="text-sm text-slate-600">Select sensitive text and click the Eye-Off icon to blackout (redact) it manually.</p>
+                   </div>
+                </div>
+             </section>
+
+             <section className="space-y-4">
+                <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
+                   <span className="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-sm font-bold">3</span>
+                   Page Setup & Layout
+                </h2>
+                <p className="text-slate-600 leading-relaxed">
+                   Click the <strong>Page Setup</strong> button in the top right of the editor to access layout options:
+                </p>
+                <ul className="list-disc pl-6 space-y-2 text-slate-600">
+                   <li><strong>Headers & Footers:</strong> Add custom text to the top and bottom of every page.</li>
+                   <li><strong>Watermarks:</strong> Add a text watermark (e.g., "CONFIDENTIAL") that appears diagonally on every page.</li>
+                   <li><strong>Page Numbers:</strong> Automatically number every page in the bottom-right corner.</li>
+                </ul>
+             </section>
+
+             <section className="space-y-4">
+                <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
+                   <span className="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-sm font-bold">4</span>
+                   AI Power Tools
+                </h2>
+                <div className="space-y-3">
+                  <p className="text-slate-600">Use the sidebar to perform advanced AI actions:</p>
+                  <ul className="list-disc pl-6 space-y-2 text-slate-600">
+                     <li><strong>Remove Watermark Text:</strong> AI intelligently finds and removes repetitive text like "Draft" or "Sample" from the content.</li>
+                     <li><strong>Redact Sensitive Info:</strong> Automatically detects and replaces Names, Emails, Phone Numbers, and Addresses with [REDACTED].</li>
+                     <li><strong>Translate:</strong> Instantly translate your entire document into Spanish, French, German, or Chinese.</li>
+                     <li><strong>Summarize & Simplify:</strong> Create executive summaries or simplify complex language for broader audiences.</li>
+                  </ul>
+                </div>
+             </section>
+
+             <section className="space-y-4">
+                <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
+                   <span className="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-sm font-bold">5</span>
+                   Adding Signatures
+                </h2>
+                <p className="text-slate-600 leading-relaxed">
+                   Click the "Sign" button in the toolbar. You can <strong>Draw</strong> your signature, <strong>Type</strong> it to use a handwriting font, or <strong>Upload</strong> an image of your signature.
+                </p>
+             </section>
+             
+             <div className="pt-6 border-t border-slate-100">
+                <button 
+                  onClick={() => setViewMode('HOME')}
+                  className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                >
+                  Back to Tool
+                </button>
+             </div>
+           </div>
         </div>
-      </nav>
+      );
+    }
 
-      {/* Hero / Upload Section */}
-      <main className="flex-1 flex flex-col items-center justify-center p-4">
+    if (status === AnalysisStatus.COMPLETE && analysisData) {
+      return <AnalysisView analysis={analysisData} onReset={reset} />;
+    }
+
+    return (
+      <main className="flex-1 flex flex-col items-center justify-center p-4 animate-in fade-in duration-500">
         <div className="max-w-3xl w-full space-y-8 text-center">
           
           <div className="space-y-4">
             <h1 className="text-4xl md:text-5xl font-extrabold text-slate-900 tracking-tight">
-              Transform Your PDF with <span className="text-blue-600">AI Intelligence</span>
+              Edit PDF Online
             </h1>
             <p className="text-lg text-slate-600 max-w-2xl mx-auto">
-              Upload any PDF to summarize, edit, translate, and extract data instantly. 
-              Powered by advanced Gemini AI models for unmatched accuracy.
+              Upload any PDF to summarize, edit, translate, and extract data instantly.
             </p>
           </div>
 
@@ -203,9 +284,9 @@ const App: React.FC = () => {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-10 text-left">
              {[
                { title: "Smart Summary", desc: "Get key points instantly" },
-               { title: "Edit & Rewrite", desc: "Fix grammar & tone" },
+               { title: "Rich Editor", desc: "Format text & add signatures" },
                { title: "Visual Insights", desc: "Charts & data extraction" },
-               { title: "Secure & Fast", desc: "Processed in memory" }
+               { title: "Export Anywhere", desc: "PDF, Word, Excel support" }
              ].map((f, i) => (
                <div key={i} className="p-4 bg-white rounded-xl shadow-sm border border-slate-200">
                  <h4 className="font-bold text-slate-800">{f.title}</h4>
@@ -215,10 +296,39 @@ const App: React.FC = () => {
           </div>
         </div>
       </main>
+    );
+  };
+
+  return (
+    <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
       
-      <footer className="bg-white border-t border-slate-200 py-6 text-center text-sm text-slate-400">
-        <p>&copy; {new Date().getFullYear()} Edit PDF Online. Powered by Google Gemini.</p>
-      </footer>
+      {/* Navigation */}
+      <nav className="bg-white border-b border-slate-200 sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between h-16 items-center">
+            <button 
+              onClick={() => setViewMode('HOME')}
+              className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+            >
+              <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-lg">
+                P
+              </div>
+              <span className="font-bold text-xl tracking-tight text-slate-800">Edit PDF Online</span>
+            </button>
+            <div className="flex items-center gap-4">
+               <button 
+                 onClick={() => setViewMode('DOCUMENTATION')}
+                 className={`text-sm font-medium flex items-center gap-1 hover:text-blue-600 transition-colors ${viewMode === 'DOCUMENTATION' ? 'text-blue-600' : 'text-slate-500'}`}
+               >
+                 <BookIcon /> Documentation
+               </button>
+            </div>
+          </div>
+        </div>
+      </nav>
+
+      {renderContent()}
+      
     </div>
   );
 };

@@ -55,7 +55,11 @@ export enum ToolAction {
   GENERATE_QUIZ = 'Generate Quiz',
   BULLET_POINTS = 'Convert to Bullets',
   FIX_PUNCTUATION = 'Fix Punctuation',
-  FORMAT_HTML = 'Format as HTML'
+  FORMAT_HTML = 'Format as HTML',
+
+  // Clean Up & Security
+  REMOVE_WATERMARK = 'Remove Watermark Text',
+  REDACT_PII = 'Redact Sensitive Info'
 }
 
 export interface FileData {
@@ -63,4 +67,11 @@ export interface FileData {
   size: number;
   type: string;
   base64: string;
+}
+
+export interface PageSetup {
+  watermark: string;
+  header: string;
+  footer: string;
+  showPageNumbers: boolean;
 }

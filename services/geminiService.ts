@@ -122,6 +122,10 @@ export const transformText = async (text: string, action: ToolAction): Promise<s
     case ToolAction.FIX_PUNCTUATION: promptText = "Fix only the punctuation in this text, keeping words the same."; break;
     case ToolAction.FORMAT_HTML: promptText = "Format this text as clean HTML code (using p, h1, ul, etc tags) inside a div."; break;
 
+    // Clean Up & Security
+    case ToolAction.REMOVE_WATERMARK: promptText = "Remove repetitive watermark phrases (like 'Confidential', 'Draft', 'Sample') or artifact text that appears to be a watermark. Keep the core content intact."; break;
+    case ToolAction.REDACT_PII: promptText = "Replace all Personally Identifiable Information (Names, Phone Numbers, Emails, Addresses, SSNs) with '[REDACTED]'. Maintain the rest of the text exactly."; break;
+
     default: promptText = "Improve this text.";
   }
 

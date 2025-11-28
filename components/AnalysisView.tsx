@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
-import { PdfAnalysis, ToolAction } from '../types';
+import React, { useState, useRef } from 'react';
+import { PdfAnalysis, ToolAction, PageSetup } from '../types';
 import { CustomPieChart, CustomBarChart } from './Charts';
-import { DownloadIcon, TextIcon, ChartIcon, LoadingSpinner } from './Icons';
+import { DownloadIcon, TextIcon, ChartIcon, LoadingSpinner, SettingsIcon } from './Icons';
 import { transformText } from '../services/geminiService';
+import RichTextEditor from './RichTextEditor';
 import { jsPDF } from "jspdf";
+import PageSetupModal from './PageSetupModal';
 
 interface Props {
   analysis: PdfAnalysis;
@@ -14,17 +16,44 @@ const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
 
 const AnalysisView: React.FC<Props> = ({ analysis, onReset }) => {
   const [activeTab, setActiveTab] = useState<'editor' | 'charts'>('editor');
-  const [editableText, setEditableText] = useState(analysis.fullText);
+  // We initialize with simple text converted to basic paragraphs for the RTE
+  const [editableContent, setEditableContent] = useState(() => {
+    return analysis.fullText
+      .split('\n')
+      .map(line => line.trim() ? `<p>${line}</p>` : '<br/>')
+      .join('');
+  });
   const [isProcessing, setIsProcessing] = useState(false);
   const [lastAction, setLastAction] = useState<string | null>(null);
   const [showExportMenu, setShowExportMenu] = useState(false);
+  const [showPageSetup, setShowPageSetup] = useState(false);
+  
+  // Page Configuration State
+  const [pageConfig, setPageConfig] = useState<PageSetup>({
+    watermark: '',
+    header: '',
+    footer: '',
+    showPageNumbers: false
+  });
 
   const handleToolAction = async (action: ToolAction) => {
     setIsProcessing(true);
     setLastAction(action);
     try {
-      const result = await transformText(editableText, action);
-      setEditableText(result);
+      // Strip HTML for processing to keep Gemini focused on text
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = editableContent;
+      const plainText = tempDiv.innerText;
+
+      const result = await transformText(plainText, action);
+      
+      // Convert result back to simple HTML paragraphs
+      const newHtml = result
+        .split('\n')
+        .map(line => line.trim() ? `<p>${line}</p>` : '<br/>')
+        .join('');
+
+      setEditableContent(newHtml);
       if (activeTab !== 'editor') setActiveTab('editor');
     } catch (e) {
       alert("Failed to process request. Please try again.");
@@ -33,44 +62,83 @@ const AnalysisView: React.FC<Props> = ({ analysis, onReset }) => {
     }
   };
 
-  const downloadPDF = () => {
-    const doc = new jsPDF();
-    const pageWidth = doc.internal.pageSize.getWidth();
-    const pageHeight = doc.internal.pageSize.getHeight();
-    const margin = 15;
-    const maxWidth = pageWidth - (margin * 2);
-    
-    // Title
-    doc.setFontSize(16);
-    doc.setTextColor(40, 40, 40);
-    doc.text("Document Analysis Result", margin, 20);
-    
-    // Content
-    doc.setFontSize(11);
-    doc.setTextColor(60, 60, 60);
-    
-    const splitText = doc.splitTextToSize(editableText, maxWidth);
-    
-    let y = 35;
-    splitText.forEach((line: string) => {
-      if (y > pageHeight - margin) {
-        doc.addPage();
-        y = margin;
-      }
-      doc.text(line, margin, y);
-      y += 6;
+  const downloadPDF = async () => {
+    const doc = new jsPDF({
+      unit: 'pt',
+      format: 'a4'
     });
+
+    // Create a temporary container to render HTML specifically for PDF
+    const tempContainer = document.createElement('div');
+    tempContainer.style.width = '550px'; // A4 width approx in pt minus margins
+    tempContainer.style.padding = '20px';
+    tempContainer.style.fontFamily = 'Arial, sans-serif';
+    tempContainer.style.fontSize = '12px';
+    tempContainer.innerHTML = `
+      <div style="color: #444; line-height: 1.5;">${editableContent}</div>
+    `;
+    document.body.appendChild(tempContainer);
+
+    try {
+        await doc.html(tempContainer, {
+            callback: (doc) => {
+                const pageCount = doc.getNumberOfPages();
+                const width = doc.internal.pageSize.getWidth();
+                const height = doc.internal.pageSize.getHeight();
+
+                for (let i = 1; i <= pageCount; i++) {
+                    doc.setPage(i);
+                    doc.setFontSize(10);
+                    doc.setTextColor(150);
+
+                    // Header
+                    if (pageConfig.header) {
+                        doc.text(pageConfig.header, 20, 30);
+                    }
+
+                    // Footer
+                    if (pageConfig.footer) {
+                         doc.text(pageConfig.footer, 20, height - 20);
+                    }
+
+                    // Page Numbers
+                    if (pageConfig.showPageNumbers) {
+                        doc.text(`Page ${i} of ${pageCount}`, width - 100, height - 20);
+                    }
+
+                    // Watermark (Centered, Rotated)
+                    if (pageConfig.watermark) {
+                        doc.saveGraphicsState();
+                        doc.setTextColor(230, 230, 230); // Very light gray
+                        doc.setFontSize(50);
+                        // Rotate 45 degrees approx center
+                        doc.text(pageConfig.watermark, width / 2, height / 2, { align: 'center', angle: 45 });
+                        doc.restoreGraphicsState();
+                    }
+                }
+
+                doc.save("smart-pdf-edit.pdf");
+                document.body.removeChild(tempContainer);
+            },
+            x: 20,
+            y: 40, // Offset for header
+            width: 550,
+            windowWidth: 800,
+            margin: [40, 20, 40, 20] // Top, Right, Bottom, Left
+        });
+    } catch (e) {
+        console.error(e);
+        document.body.removeChild(tempContainer);
+        alert("Could not generate PDF with advanced formatting. Falling back to simple text.");
+    }
     
-    doc.save("smart-pdf-edit.pdf");
     setShowExportMenu(false);
   };
 
   const downloadDoc = () => {
     const header = "<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='utf-8'><title>Export HTML To Doc</title></head><body>";
     const footer = "</body></html>";
-    // Formatting text for word
-    const formattedText = editableText.replace(/\n/g, '<br/>');
-    const sourceHTML = header + `<div style="font-family: Arial; font-size: 11pt; white-space: pre-wrap;">${formattedText}</div>` + footer;
+    const sourceHTML = header + `<div style="font-family: Arial; font-size: 11pt;">${editableContent}</div>` + footer;
     
     const source = 'data:application/vnd.ms-word;charset=utf-8,' + encodeURIComponent(sourceHTML);
     const fileDownload = document.createElement("a");
@@ -83,7 +151,10 @@ const AnalysisView: React.FC<Props> = ({ analysis, onReset }) => {
   };
 
   const downloadCSV = () => {
-    // CSV with analysis data + text
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = editableContent;
+    const plainText = tempDiv.innerText;
+
     const rows = [
       ["Type", "Content"],
       ["Summary", analysis.summary.replace(/"/g, '""')],
@@ -97,7 +168,7 @@ const AnalysisView: React.FC<Props> = ({ analysis, onReset }) => {
       ["Topic", "Relevance"],
       ...analysis.topics.map(t => [t.name, t.value]),
       [],
-      ["Edited Text", editableText.replace(/"/g, '""')]
+      ["Edited Text", plainText.replace(/"/g, '""')]
     ];
     
     const csvContent = "data:text/csv;charset=utf-8," 
@@ -114,8 +185,12 @@ const AnalysisView: React.FC<Props> = ({ analysis, onReset }) => {
   };
 
   const downloadTxt = () => {
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = editableContent;
+    const plainText = tempDiv.innerText;
+
     const element = document.createElement("a");
-    const file = new Blob([editableText], {type: 'text/plain'});
+    const file = new Blob([plainText], {type: 'text/plain'});
     element.href = URL.createObjectURL(file);
     element.download = "smart-pdf-edit.txt";
     document.body.appendChild(element);
@@ -141,6 +216,15 @@ const AnalysisView: React.FC<Props> = ({ analysis, onReset }) => {
                 <h4 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Basics</h4>
                 <div className="grid grid-cols-1 gap-2">
                    {[ToolAction.SUMMARIZE, ToolAction.FIX_GRAMMAR, ToolAction.SIMPLIFY, ToolAction.BULLET_POINTS].map(action => (
+                     <ActionButton key={action} action={action} onClick={handleToolAction} disabled={isProcessing} />
+                   ))}
+                </div>
+              </div>
+
+              <div>
+                <h4 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Clean & Secure</h4>
+                <div className="grid grid-cols-1 gap-2">
+                   {[ToolAction.REMOVE_WATERMARK, ToolAction.REDACT_PII].map(action => (
                      <ActionButton key={action} action={action} onClick={handleToolAction} disabled={isProcessing} />
                    ))}
                 </div>
@@ -213,7 +297,7 @@ const AnalysisView: React.FC<Props> = ({ analysis, onReset }) => {
       <div className="flex-1 flex flex-col gap-4 min-h-0">
         
         {/* Header Tabs */}
-        <div className="flex items-center justify-between bg-white p-2 rounded-xl shadow-sm border border-slate-200">
+        <div className="flex items-center justify-between bg-white p-2 rounded-xl shadow-sm border border-slate-200 flex-wrap gap-2">
           <div className="flex gap-2">
             <button
               onClick={() => setActiveTab('editor')}
@@ -237,36 +321,44 @@ const AnalysisView: React.FC<Props> = ({ analysis, onReset }) => {
             </button>
           </div>
 
-          <div className="relative">
-            <button 
-              onClick={() => setShowExportMenu(!showExportMenu)}
-              className="flex items-center gap-2 px-4 py-2 bg-slate-900 text-white text-sm font-medium rounded-lg hover:bg-slate-800 transition-colors"
+          <div className="flex items-center gap-2 ml-auto">
+            <button
+               onClick={() => setShowPageSetup(true)}
+               className="flex items-center gap-2 px-4 py-2 text-slate-600 text-sm font-medium rounded-lg hover:bg-slate-100 transition-colors border border-transparent hover:border-slate-200"
             >
-              <DownloadIcon /> Export Result
+              <SettingsIcon /> Page Setup
             </button>
-            
-            {showExportMenu && (
-              <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl border border-slate-100 z-50 overflow-hidden">
-                <div className="py-1">
-                  <button onClick={downloadPDF} className="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-blue-50 hover:text-blue-700 flex items-center gap-2">
-                    <span className="font-bold text-red-500">PDF</span> Document (.pdf)
-                  </button>
-                  <button onClick={downloadDoc} className="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-blue-50 hover:text-blue-700 flex items-center gap-2">
-                    <span className="font-bold text-blue-600">Word</span> Document (.doc)
-                  </button>
-                  <button onClick={downloadCSV} className="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-blue-50 hover:text-blue-700 flex items-center gap-2">
-                     <span className="font-bold text-green-600">Excel</span> / CSV Data (.csv)
-                  </button>
-                  <button onClick={downloadTxt} className="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-blue-50 hover:text-blue-700 flex items-center gap-2">
-                     <span className="font-bold text-slate-500">TXT</span> Plain Text (.txt)
-                  </button>
+
+            <div className="relative">
+              <button 
+                onClick={() => setShowExportMenu(!showExportMenu)}
+                className="flex items-center gap-2 px-4 py-2 bg-slate-900 text-white text-sm font-medium rounded-lg hover:bg-slate-800 transition-colors"
+              >
+                <DownloadIcon /> Export
+              </button>
+              
+              {showExportMenu && (
+                <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl border border-slate-100 z-50 overflow-hidden">
+                  <div className="py-1">
+                    <button onClick={downloadPDF} className="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-blue-50 hover:text-blue-700 flex items-center gap-2">
+                      <span className="font-bold text-red-500">PDF</span> Document (.pdf)
+                    </button>
+                    <button onClick={downloadDoc} className="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-blue-50 hover:text-blue-700 flex items-center gap-2">
+                      <span className="font-bold text-blue-600">Word</span> Document (.doc)
+                    </button>
+                    <button onClick={downloadCSV} className="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-blue-50 hover:text-blue-700 flex items-center gap-2">
+                      <span className="font-bold text-green-600">Excel</span> / CSV Data (.csv)
+                    </button>
+                    <button onClick={downloadTxt} className="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-blue-50 hover:text-blue-700 flex items-center gap-2">
+                      <span className="font-bold text-slate-500">TXT</span> Plain Text (.txt)
+                    </button>
+                  </div>
                 </div>
-              </div>
-            )}
-            {/* Backdrop to close menu */}
-            {showExportMenu && (
-              <div className="fixed inset-0 z-40" onClick={() => setShowExportMenu(false)}></div>
-            )}
+              )}
+              {showExportMenu && (
+                <div className="fixed inset-0 z-40" onClick={() => setShowExportMenu(false)}></div>
+              )}
+            </div>
           </div>
         </div>
 
@@ -274,7 +366,7 @@ const AnalysisView: React.FC<Props> = ({ analysis, onReset }) => {
         <div className="flex-1 bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden relative flex flex-col">
           
           {isProcessing && (
-            <div className="absolute inset-0 bg-white/80 backdrop-blur-sm z-30 flex items-center justify-center">
+            <div className="absolute inset-0 bg-white/80 backdrop-blur-sm z-30 flex items-center justify-center rounded-xl">
               <div className="bg-white p-6 rounded-2xl shadow-xl border border-blue-100 flex flex-col items-center animate-in fade-in zoom-in duration-200">
                 <div className="text-blue-600 mb-2"><LoadingSpinner /></div>
                 <p className="text-slate-600 font-medium">Processing: {lastAction}...</p>
@@ -283,17 +375,10 @@ const AnalysisView: React.FC<Props> = ({ analysis, onReset }) => {
           )}
 
           {activeTab === 'editor' ? (
-            <div className="h-full flex flex-col">
-               <div className="p-3 bg-slate-50 border-b border-slate-200 text-xs text-slate-500 flex justify-between items-center">
-                  <span>AI Editor Mode</span>
-                  <span className="bg-slate-200 px-2 py-1 rounded text-slate-600 font-mono">{editableText.length} chars</span>
-               </div>
-               <textarea
-                 value={editableText}
-                 onChange={(e) => setEditableText(e.target.value)}
-                 className="flex-1 w-full p-6 resize-none focus:outline-none text-slate-800 leading-relaxed font-mono text-sm md:text-base"
-                 spellCheck={false}
-                 placeholder="Upload a PDF to see content here..."
+            <div className="h-full flex flex-col p-1">
+               <RichTextEditor 
+                 initialContent={editableContent}
+                 onChange={setEditableContent}
                />
             </div>
           ) : (
@@ -327,6 +412,14 @@ const AnalysisView: React.FC<Props> = ({ analysis, onReset }) => {
           )}
         </div>
       </div>
+
+      {showPageSetup && (
+        <PageSetupModal 
+          config={pageConfig}
+          onSave={setPageConfig}
+          onClose={() => setShowPageSetup(false)}
+        />
+      )}
     </div>
   );
 };
