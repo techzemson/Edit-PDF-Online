@@ -26,6 +26,11 @@ const SignatureModal: React.FC<Props> = ({ onSave, onClose }) => {
   const [selectedFont, setSelectedFont] = useState(FONTS[0].name);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isDrawing, setIsDrawing] = useState(false);
+  
+  // Customization State
+  const [isBold, setIsBold] = useState(false);
+  const [strokeWidth, setStrokeWidth] = useState(2);
+  const [inkColor, setInkColor] = useState('#000000');
 
   // Canvas drawing logic
   useEffect(() => {
@@ -33,12 +38,12 @@ const SignatureModal: React.FC<Props> = ({ onSave, onClose }) => {
       const canvas = canvasRef.current;
       const ctx = canvas.getContext('2d');
       if (ctx) {
-        ctx.lineWidth = 2;
+        ctx.lineWidth = strokeWidth;
         ctx.lineCap = 'round';
-        ctx.strokeStyle = '#000';
+        ctx.strokeStyle = inkColor;
       }
     }
-  }, [activeTab]);
+  }, [activeTab, strokeWidth, inkColor]);
 
   const startDrawing = (e: React.MouseEvent | React.TouchEvent) => {
     setIsDrawing(true);
@@ -72,6 +77,11 @@ const SignatureModal: React.FC<Props> = ({ onSave, onClose }) => {
 
   const stopDrawing = () => {
     setIsDrawing(false);
+    const canvas = canvasRef.current;
+    if (canvas) {
+        const ctx = canvas.getContext('2d');
+        ctx?.closePath();
+    }
   };
 
   const clearCanvas = () => {
@@ -79,6 +89,7 @@ const SignatureModal: React.FC<Props> = ({ onSave, onClose }) => {
     if (canvas) {
       const ctx = canvas.getContext('2d');
       ctx?.clearRect(0, 0, canvas.width, canvas.height);
+      ctx?.beginPath(); // Reset path
     }
   };
 
@@ -96,10 +107,12 @@ const SignatureModal: React.FC<Props> = ({ onSave, onClose }) => {
         ctx.fillStyle = 'rgba(0,0,0,0)'; 
         ctx.clearRect(0,0, canvas.width, canvas.height);
         
-        ctx.font = `48px "${selectedFont}"`;
-        ctx.fillStyle = 'black';
+        // Font setup with Bold toggle
+        ctx.font = `${isBold ? 'bold ' : ''}48px "${selectedFont}"`;
+        ctx.fillStyle = inkColor;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
+        
         ctx.fillText(typedName, canvas.width/2, canvas.height/2);
         onSave(canvas.toDataURL());
       }
@@ -140,6 +153,50 @@ const SignatureModal: React.FC<Props> = ({ onSave, onClose }) => {
         </div>
 
         <div className="p-6 flex-1 flex flex-col items-center justify-start min-h-[400px] bg-gray-50 overflow-y-auto">
+            
+          {/* Controls Bar */}
+          <div className="w-full flex justify-between items-center mb-4 bg-white p-3 rounded-lg border border-gray-200 shadow-sm">
+             <div className="flex items-center gap-2">
+                 <span className="text-xs font-semibold text-gray-500 uppercase">Color:</span>
+                 <div className="flex gap-1">
+                     {['#000000', '#1E40AF', '#DC2626'].map(c => (
+                         <button 
+                           key={c} 
+                           onClick={() => setInkColor(c)}
+                           className={`w-6 h-6 rounded-full border-2 ${inkColor === c ? 'border-gray-400 scale-110' : 'border-transparent'}`}
+                           style={{backgroundColor: c}}
+                         />
+                     ))}
+                 </div>
+             </div>
+
+             {activeTab === 'draw' && (
+                 <div className="flex items-center gap-2">
+                     <span className="text-xs font-semibold text-gray-500 uppercase">Thickness:</span>
+                     <input 
+                       type="range" min="1" max="8" step="1" 
+                       value={strokeWidth}
+                       onChange={(e) => setStrokeWidth(parseInt(e.target.value))}
+                       className="w-24 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                     />
+                 </div>
+             )}
+
+             {activeTab === 'type' && (
+                 <div className="flex items-center gap-2">
+                     <label className="flex items-center gap-2 cursor-pointer select-none text-sm font-medium text-gray-700">
+                        <input 
+                          type="checkbox" 
+                          checked={isBold}
+                          onChange={(e) => setIsBold(e.target.checked)}
+                          className="w-4 h-4 text-blue-600 rounded"
+                        />
+                        Bold
+                     </label>
+                 </div>
+             )}
+          </div>
+
           {activeTab === 'draw' && (
             <div className="w-full h-64 bg-white border-2 border-dashed border-gray-300 rounded-xl relative shadow-sm">
                <canvas
@@ -179,7 +236,7 @@ const SignatureModal: React.FC<Props> = ({ onSave, onClose }) => {
                                 onClick={() => setSelectedFont(font.name)}
                                 className={`p-3 text-center border rounded-lg transition-all ${selectedFont === font.name ? 'border-blue-500 bg-blue-50 ring-1 ring-blue-500' : 'border-gray-100 hover:bg-gray-50'}`}
                             >
-                                <span className="text-2xl text-gray-800" style={{ fontFamily: font.name }}>
+                                <span className="text-2xl text-gray-800" style={{ fontFamily: font.name, fontWeight: isBold ? 'bold' : 'normal', color: inkColor }}>
                                     {typedName || "Signature"}
                                 </span>
                                 <div className="text-[10px] text-gray-400 mt-1">{font.label}</div>

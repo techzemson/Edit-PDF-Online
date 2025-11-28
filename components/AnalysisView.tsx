@@ -204,6 +204,18 @@ const AnalysisView: React.FC<Props> = ({ analysis, onReset }) => {
       
       {/* Sidebar / Toolbar */}
       <div className="w-full lg:w-72 flex-shrink-0 flex flex-col gap-4 max-h-[calc(100vh-3rem)] sticky top-6">
+        
+        {/* Upload Another Button (Moved to Top) */}
+        <button 
+          onClick={onReset}
+          className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl shadow-md transition-all flex items-center justify-center gap-2 transform active:scale-95"
+        >
+          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+          </svg>
+          Upload Another PDF
+        </button>
+
         <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex-1 flex flex-col overflow-hidden">
           <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2 flex-shrink-0">
             <span className="w-2 h-6 bg-blue-600 rounded-full"></span>
@@ -284,13 +296,6 @@ const AnalysisView: React.FC<Props> = ({ analysis, onReset }) => {
              </div>
           </div>
         </div>
-
-        <button 
-          onClick={onReset}
-          className="py-2 text-slate-500 hover:text-slate-800 transition-colors flex-shrink-0"
-        >
-          ← Upload Another
-        </button>
       </div>
 
       {/* Main Content Area */}
